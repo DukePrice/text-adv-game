@@ -1,0 +1,386 @@
+const readline = require('readline-sync');
+
+const startGame = () => {
+    console.log("Welcome to the One Piece Adventure Game!");
+    console.log();
+
+    const playerName = readline.question("A bystander asks for your name: ");
+    console.log();
+    console.log(`Ahoy, ${playerName}! You enter a bustling town filled with pirates and sailors.`);
+    console.log();
+
+    mainOptions(playerName, false, 0, 0); // Initialize with visitedCrowd = false, and counters set to 0
+};
+
+const mainOptions = (playerName, visitedCrowd, navyShipsDestroyed, navyShipsSpared) => {
+    let validChoice = false; // Flag to check if a valid choice was made
+
+    while (!validChoice) {
+        console.log("\nYou see a pirate bar, a navy headquarters, and a crowd of people.");
+        if (visitedCrowd) {
+            console.log("You can also go to the docks now.");
+        }
+        console.log();
+        const choice = readline.question("Where do you want to go? (bar/navy/crowd" + (visitedCrowd ? "/docks" : "") + "): ").toLowerCase();
+        console.log();
+
+        switch (choice) {
+            case 'bar':
+                [navyShipsDestroyed, navyShipsSpared] = barScene(playerName, navyShipsDestroyed, navyShipsSpared);
+                validChoice = true; // Valid choice made
+                break;
+            case 'navy':
+                [navyShipsDestroyed, navyShipsSpared] = navyHeadquartersScene(playerName, navyShipsDestroyed, navyShipsSpared);
+                validChoice = true; // Valid choice made
+                break;
+            case 'crowd':
+                visitedCrowd = true; // Mark crowd as visited
+                [navyShipsDestroyed, navyShipsSpared] = crowdScene(playerName, navyShipsDestroyed, navyShipsSpared);
+                validChoice = true; // Valid choice made
+                break;
+            case 'docks':
+                if (visitedCrowd) {
+                    [navyShipsDestroyed, navyShipsSpared] = docksScene(playerName, navyShipsDestroyed, navyShipsSpared); // Call the docks scene
+                    validChoice = true; // Valid choice made
+                } else {
+                    console.log("You can't go to the docks until you've visited the crowd.");
+                    console.log();
+                }
+                break;
+            default:
+                console.log("Invalid choice! Please choose bar, navy, crowd" + (visitedCrowd ? ", or docks" : "") + ".");
+                console.log();
+        }
+    }
+};
+
+const crowdScene = (playerName, navyShipsDestroyed, navyShipsSpared) => {
+    console.log(`You push through the crowd and witness a shocking scene!`);
+    console.log();
+    console.log(`The Pirate King is being executed. His final words echo through the air:`);
+    console.log(`"I have found what the world has to offer and my treasure is now yours to find. Set to the seas and claim wealth, fame, and power!"`);
+
+    const choice = readline.question("Do you want to go to the docks or the navy headquarters? (docks/navy): ").toLowerCase();
+    console.log();
+    if (choice === 'docks') {
+        return docksScene(playerName, navyShipsDestroyed, navyShipsSpared);
+    } else if (choice === 'navy') {
+        return navyHeadquartersScene(playerName, navyShipsDestroyed, navyShipsSpared);
+    } else {
+        console.log("Invalid choice! You're left standing in the crowd.");
+        console.log();
+        return [navyShipsDestroyed, navyShipsSpared]; // No changes to destroyed/spared
+    }
+};
+
+const barScene = (playerName, navyShipsDestroyed, navyShipsSpared) => {
+    console.log(`You enter the pirate bar, filled with rowdy pirates. The bartender approaches you.`);
+    console.log();
+
+    const drinkChoice = readline.question("Do you want water or beer? (water/beer): ").toLowerCase();
+    console.log();
+
+    if (drinkChoice === 'water') {
+        console.log("The bartender scoffs at you: 'Ya got the sea legs of a drunken penguin and the face of a startled pufferfish!'");
+        console.log();
+    } else if (drinkChoice === 'beer') {
+        console.log("You enjoy a cold beer and overhear pirates talking about the execution of the Pirate King and his hidden treasure.");
+        console.log();
+    } else {
+        console.log("Invalid choice! You're left standing there awkwardly.");
+        console.log();
+    }
+
+    let insideBar = true;
+
+    while (insideBar) {
+        const nextChoice = readline.question("Do you want to go back outside or stay at the bar? (outside/stay): ").toLowerCase();
+        console.log();
+
+        if (nextChoice === 'outside') {
+            console.log("You step back outside to make another choice.");
+            console.log();
+            insideBar = false; // Exit loop
+        } else if (nextChoice === 'stay') {
+            console.log("You stay at the bar, enjoying the pirate atmosphere.");
+            console.log();
+        } else {
+            console.log("Invalid choice! You remain confused.");
+            console.log();
+        }
+    }
+
+    return [navyShipsDestroyed, navyShipsSpared]; // No changes to destroyed/spared
+};
+
+const navyHeadquartersScene = (playerName, navyShipsDestroyed, navyShipsSpared) => {
+    console.log("You enter the Navy Headquarters. An officer greets you.");
+    console.log();
+    const choice = readline.question("Are you visiting or here to watch the execution of the Pirate King? (visit/witness): ").toLowerCase();
+    console.log();
+
+    if (choice === 'witness') {
+        console.log("The officer says, 'Well, join the crowd and enjoy the show!'");
+        console.log();
+        return crowdScene(playerName, navyShipsDestroyed, navyShipsSpared); // Go to the crowd scene
+    } else if (choice === 'visit') {
+        console.log("The officer informs you that you can only visit the lobby.");
+        console.log();
+        const lobbyChoice = readline.question("Do you want to read the bulletin board or go back outside? (read/outside): ").toLowerCase();
+        console.log();
+        if (lobbyChoice === 'read') {
+            console.log("Wanted: The Pirate King - Dead or Alive!");
+            console.log();
+            const backChoice = readline.question("Do you want to stay or go back outside? (stay/outside): ").toLowerCase();
+            console.log();
+            if (backChoice === 'stay') {
+                console.log("You linger in the lobby, contemplating your next move.");
+                console.log();
+                return navyHeadquartersScene(playerName, navyShipsDestroyed, navyShipsSpared); // Stay in lobby
+            } else {
+                console.log("You step back outside to make another choice.");
+                console.log();
+                return [navyShipsDestroyed, navyShipsSpared]; // No changes to destroyed/spared
+            }
+        } else if (lobbyChoice === 'outside') {
+            console.log("You step back outside to make another choice.");
+            console.log();
+            return [navyShipsDestroyed, navyShipsSpared]; // No changes to destroyed/spared
+        } else {
+            console.log("Invalid choice! You're stuck in the lobby.");
+            console.log();
+            return [navyShipsDestroyed, navyShipsSpared]; // No changes to destroyed/spared
+        }
+    } else {
+        console.log("Invalid choice! You're left standing awkwardly.");
+        console.log();
+        return [navyShipsDestroyed, navyShipsSpared]; // No changes to destroyed/spared
+    }
+};
+
+const docksScene = (playerName, navyShipsDestroyed, navyShipsSpared) => {
+    console.log(`You head to the docks, where you see ships and pirates preparing to set sail in search of the Pirate King's treasure.`);
+    console.log();
+    
+    const manOnDocks = readline.question("A man sitting on the docks asks you if you're a pirate. Do you want to become a pirate or go back to town? (pirate/back): ").toLowerCase();
+    console.log();
+
+    if (manOnDocks === 'pirate') {
+        console.log(`The man says, 'Well, it seems you don't have a boat. Lucky for you, I've just lost my crew to another pirate. I'll give you my boat if I can join your crew!'`);
+        console.log();
+        console.log(`You accept the man's offer and gather a few more stragglers to form your pirate crew.`);
+        console.log(`With your new crew, you set sail to one of the four islands!`);
+        console.log();
+
+        // Start the first island adventure
+        return islandAdventure(playerName, navyShipsDestroyed, navyShipsSpared);
+    } else {
+        console.log(`You decide to head back to town.`);
+        console.log();
+        return [navyShipsDestroyed, navyShipsSpared]; // No changes to destroyed/spared
+    }
+};
+
+const islandAdventure = (playerName, navyShipsDestroyed, navyShipsSpared) => {
+    const islands = ["Whispering Whirlpool", "Rumble Punch", "Tide's Fortune", "Compass Chaos"];
+
+    for (let i = 0; i < islands.length; i++) {
+        console.log(`You sail to the island: ${islands[i]}!`);
+        console.log();
+
+        let validEncounter = false;
+
+        while (!validEncounter) {
+            const navyEncounter = readline.question("You see a navy ship approaching! Do you want to attack or try to approach? (attack/approach): ").toLowerCase();
+            console.log();
+
+            if (navyEncounter === 'attack') {
+                console.log(`You attack the navy ship! It's damaged and tries to flee.`);
+                console.log();
+                const destroyOrSpare = readline.question("Do you want to destroy the ship or spare it? (destroy/spare): ").toLowerCase();
+                console.log();
+                
+                if (destroyOrSpare === 'destroy') {
+                    console.log(`You destroy the navy ship! You gain notoriety as a fierce pirate.`);
+                    navyShipsDestroyed++;
+                } else {
+                    console.log(`You spare the navy ship. You show mercy but gain some enemies.`);
+                    navyShipsSpared++;
+                }
+                validEncounter = true; // Valid choice made
+            } else if (navyEncounter === 'approach') {
+                console.log(`You try to approach the navy ship, but they see you and attack!`);
+                console.log();
+                const defendOrFlee = readline.question("Do you want to attack back or flee? (attack/flee): ").toLowerCase();
+                console.log();
+
+                if (defendOrFlee === 'attack') {
+                    console.log(`You attack back! The navy ship is damaged and tries to flee.`);
+                    const destroyOrSpare = readline.question("Do you want to destroy the ship or spare it? (destroy/spare): ").toLowerCase();
+                    console.log();
+                    
+                    if (destroyOrSpare === 'destroy') {
+                        console.log(`You destroy the navy ship! You gain notoriety as a fierce pirate.`);
+                        navyShipsDestroyed++;
+                    } else {
+                        console.log(`You spare the navy ship. You show mercy but gain some enemies.`);
+                        navyShipsSpared++;
+                    }
+                    validEncounter = true; // Valid choice made
+                } else if (defendOrFlee === 'flee') {
+                    console.log(`You flee and make landfall on the island to repair your boat.`);
+                    console.log(`You spend some time repairing your ship and gathering your thoughts.`);
+                    console.log();
+                    console.log(`Now that your ship is ready, you prepare to face the navy again on the same island.`);
+                    console.log();
+                    // Continue the loop to prompt for navy encounter again
+                } else {
+                    console.log("Invalid choice! You remain under threat.");
+                    console.log();
+                }
+            } else {
+                console.log("Invalid choice! Please choose 'attack' or 'approach'.");
+                console.log();
+            }
+        }
+
+        console.log(`You finish your adventure on ${islands[i]} and continue to the next island.`);
+        console.log();
+    }
+
+    // After the first set of islands, show the wanted poster
+    wantedPoster(playerName, navyShipsDestroyed, navyShipsSpared);
+};
+
+const wantedPoster = (playerName, navyShipsDestroyed, navyShipsSpared) => {
+    console.log(`You arrive at a nearby city and see a wanted poster for ${playerName}:`);
+    console.log();
+    
+    if (navyShipsDestroyed === 4) {
+        console.log("Most Wanted Dead!");
+    } else if (navyShipsDestroyed === 3 && navyShipsSpared === 1) {
+        console.log("Wanted Dead!");
+    } else if (navyShipsDestroyed === 2 && navyShipsSpared === 2) {
+        console.log("Wanted Dead or Alive!");
+    } else if (navyShipsDestroyed === 1 && navyShipsSpared === 3) {
+        console.log("Wanted Alive!");
+    } else if (navyShipsSpared === 4) {
+        console.log("Most Wanted Alive!");
+    } else {
+        console.log("You have no notoriety.");
+    }
+    console.log();
+
+    console.log("You resupply and head back to sea.");
+    console.log();
+    secondIslandAdventure(playerName, navyShipsDestroyed, navyShipsSpared); // Start the second set of islands
+};
+
+const secondIslandAdventure = (playerName, navyShipsDestroyed, navyShipsSpared) => {
+    const islands = ["Moon Temple", "Warrior's Rest", "Thunder Bubble", "Ancient Crown"];
+
+    for (let i = 0; i < islands.length; i++) {
+        console.log(`You sail to the island: ${islands[i]}!`);
+        console.log();
+
+        let validEncounter = false;
+
+        while (!validEncounter) {
+            const navyEncounter = readline.question("You see a navy ship approaching! Do you want to attack or try to approach? (attack/approach): ").toLowerCase();
+            console.log();
+
+            if (navyEncounter === 'attack') {
+                console.log(`You attack the navy ship! It's damaged and tries to flee.`);
+                console.log();
+                const destroyOrSpare = readline.question("Do you want to destroy the ship or spare it? (destroy/spare): ").toLowerCase();
+                console.log();
+                
+                if (destroyOrSpare === 'destroy') {
+                    console.log(`You destroy the navy ship! You gain notoriety as a fierce pirate.`);
+                    navyShipsDestroyed++;
+                } else {
+                    console.log(`You spare the navy ship. You show mercy but gain some enemies.`);
+                    navyShipsSpared++;
+                }
+                validEncounter = true; // Valid choice made
+            } else if (navyEncounter === 'approach') {
+                console.log(`You try to approach the navy ship, but they see you and attack!`);
+                console.log();
+                const defendOrFlee = readline.question("Do you want to attack back or flee? (attack/flee): ").toLowerCase();
+                console.log();
+
+                if (defendOrFlee === 'attack') {
+                    console.log(`You attack back! The navy ship is damaged and tries to flee.`);
+                    const destroyOrSpare = readline.question("Do you want to destroy the ship or spare it? (destroy/spare): ").toLowerCase();
+                    console.log();
+                    
+                    if (destroyOrSpare === 'destroy') {
+                        console.log(`You destroy the navy ship! You gain notoriety as a fierce pirate.`);
+                        navyShipsDestroyed++;
+                    } else {
+                        console.log(`You spare the navy ship. You show mercy but gain some enemies.`);
+                        navyShipsSpared++;
+                    }
+                    validEncounter = true; // Valid choice made
+                } else if (defendOrFlee === 'flee') {
+                    console.log(`You flee and make landfall on the island to repair your boat.`);
+                    console.log(`You spend some time repairing your ship and gathering your thoughts.`);
+                    console.log();
+                    console.log(`Now that your ship is ready, you prepare to face the navy again on the same island.`);
+                    console.log();
+                    // Continue the loop to prompt for navy encounter again
+                } else {
+                    console.log("Invalid choice! You remain under threat.");
+                    console.log();
+                }
+            } else {
+                console.log("Invalid choice! Please choose 'attack' or 'approach'.");
+                console.log();
+            }
+        }
+
+        console.log(`You finish your adventure on ${islands[i]} and continue to the next island.`);
+        console.log();
+    }
+
+    // After the second set of islands, determine the ending based on the player's actions
+    determineEnding(playerName, navyShipsDestroyed, navyShipsSpared);
+};
+
+const determineEnding = (playerName, navyShipsDestroyed, navyShipsSpared) => {
+    console.log(`You make landfall after your adventures. Based on your choices, your fate is sealed...`);
+    console.log();
+
+    if (navyShipsSpared === 4) {
+        console.log("You enjoy the rest of your life at sea with no worries.");
+    } else if (navyShipsSpared >= 5 && navyShipsSpared <= 7) {
+        console.log("You spend time at sea with little worry of the navy.");
+    } else if (navyShipsDestroyed === 4 && navyShipsSpared === 4) {
+        console.log("You become just another pirate that is forgotten; no pirate or navy man remembers your tales.");
+    } else if (navyShipsDestroyed >= 5 && navyShipsDestroyed <= 7) {
+        console.log("You are one of the hunted pirates and will go down with the ship one day soon.");
+    } else if (navyShipsDestroyed === 8) {
+        console.log("You find the Pirate King's treasure! A note reads: 'You have found my treasure; you have all the world has to offer and will pay the highest price.'");
+        console.log("You become the Pirate King, enjoying fame, wealth, and power, hunted by the navy every day until the end.");
+    }
+
+    console.log("End of your adventure.");
+    playAgain(); // Ask if the player wants to play again
+};
+
+const playAgain = () => {
+    const choice = readline.question("Do you want to play again? (yes/no): ").toLowerCase();
+    console.log();
+
+    if (choice === 'yes') {
+        startGame(); // Restart the game
+    } else if (choice === 'no') {
+        console.log("Thank you for playing! Farewell, pirate!");
+    } else {
+        console.log("Invalid choice! Please answer with 'yes' or 'no'.");
+        playAgain(); // Recur if invalid choice
+    }
+};
+
+// Start the game
+startGame();
